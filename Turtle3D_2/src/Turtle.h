@@ -19,7 +19,7 @@ class Turtle{
 public:
     Turtle();
     
-    void init( Vec3f position, Vec3f rotateAngle, float length);
+    void init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length);
     void update();
     void draw();
     

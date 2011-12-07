@@ -29,7 +29,6 @@ public:
     Vec3f startPosition;
     Vec3f initialDirection;
     Vec3f direction1;
-    Vec3f direction2;
     
     // PARAMS
 	params::InterfaceGl	mParams;
@@ -94,11 +93,13 @@ void Turtle3D_2App::setup()
     
     // TURTLE
     startPosition.set( 0.0f, 0.0f, 0.0f );
-    initialDirection.set(0.0f, 1.0f, 0.0f );
+    initialDirection.set(0.0f, 0.0f, 0.0f );
+    direction1.set( 0.0f, 0.0f, 90.0f );
+    
     startLength = 200.0f;
     
     Turtle firstTurtle;
-    firstTurtle.init( startPosition, initialDirection, startLength );
+    firstTurtle.init( startPosition, Vec3f(0.0f, 0.0f, 0.0f), initialDirection, startLength );
     
     mTurtle.push_back( firstTurtle );
 }
@@ -127,13 +128,12 @@ void Turtle3D_2App::update()
         
         if (mTurtle[i].mLength < 20.0f) {
             break;
-        }
-        
+        }       
         
         if (mTurtle[i].branchNow){
             
             Turtle newTurtle1;
-            newTurtle1.init( mTurtle[i].mFinalPosition, Vec3f(0.0f, 0.0f, 30.0f * i), 200.f);
+            newTurtle1.init( mTurtle[i].mFinalPosition, mTurtle[i].mRotateAngle, direction1, 200.f + 20.0f*i);
             
             mTurtle.push_back( newTurtle1 );
             

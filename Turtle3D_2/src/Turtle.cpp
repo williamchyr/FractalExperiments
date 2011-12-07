@@ -16,7 +16,7 @@ Turtle::Turtle()
 {
 }
 
-void Turtle::init( Vec3f position, Vec3f rotateAngle, float length)
+void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length)
 {
     mStartPosition = position;
     mCurrentPosition = mStartPosition;
@@ -24,7 +24,7 @@ void Turtle::init( Vec3f position, Vec3f rotateAngle, float length)
     mFinalLength = length;
     mLength = 0.0f;
     
-    mRotateAngle = rotateAngle;
+    mRotateAngle = rotateAngle + previousAngle;
     
     yAngleAdjusted = ((360.0f - mRotateAngle.y)/180.0f)*M_PI;
     zAngleAdjusted = ((360.0f - mRotateAngle.z)/180.0f)*M_PI;
@@ -33,7 +33,7 @@ void Turtle::init( Vec3f position, Vec3f rotateAngle, float length)
     mCartesianDirection.y = cos( (mRotateAngle.z/180.0f)*M_PI );
     mCartesianDirection.z = sin( yAngleAdjusted )*sin( zAngleAdjusted );
     
-    mFinalPosition = mCartesianDirection * mFinalLength;
+    mFinalPosition = mStartPosition + mCartesianDirection * mFinalLength;
     
     branchNow = false;
     branched = false;
