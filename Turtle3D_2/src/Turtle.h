@@ -19,7 +19,7 @@ class Turtle{
 public:
     Turtle();
     
-    void init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length);
+    void init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length, float radius);
     void update();
     void draw();
     
@@ -35,8 +35,16 @@ public:
     float mLength;
     float mFinalLength;
     
-    bool branchNow;
-    bool branched;    
+    float mRadius;
+    
+    bool branchNow1;
+    bool branched1; 
+    
+    bool branchNow2;
+    bool branched2;
+    
+    bool branchNow3;
+    bool branched3;
 };
 
 #endif

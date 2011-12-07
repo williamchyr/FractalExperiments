@@ -16,13 +16,15 @@ Turtle::Turtle()
 {
 }
 
-void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length)
+void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float length, float radius)
 {
     mStartPosition = position;
     mCurrentPosition = mStartPosition;
     
     mFinalLength = length;
     mLength = 0.0f;
+    
+    mRadius = radius;
     
     mRotateAngle = rotateAngle + previousAngle;
     
@@ -35,8 +37,14 @@ void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float
     
     mFinalPosition = mStartPosition + mCartesianDirection * mFinalLength;
     
-    branchNow = false;
-    branched = false;
+    branchNow1 = false;
+    branched1 = false;
+    
+    branchNow2 = false;
+    branched2 = false;
+    
+    branchNow3 = false;
+    branched3 = false;
 }
 
 void Turtle::update()
@@ -44,15 +52,42 @@ void Turtle::update()
     
     if (mLength < mFinalLength ) {
         mLength += 1.0f;
-    } else {
+        mCurrentPosition += mCartesianDirection;
+    }
+    
+    if (mLength > mFinalLength*(1.0f/4.0f) ) {
         
-        if (branched){
-            branchNow = false;
+        if (branched1){
+            branchNow1 = false;
         }
         
-        if (!branched){
-            branchNow = true;
-            branched = true;
+        if (!branched1){
+            branchNow1 = true;
+            branched1 = true;
+        }
+    }
+    
+    if (mLength > mFinalLength*(2.0f/4.0f) ) {
+        
+        if (branched2){
+            branchNow2 = false;
+        }
+        
+        if (!branched2){
+            branchNow2 = true;
+            branched2 = true;
+        }
+    }
+    
+    if (mLength > mFinalLength*(3.0f/4.0f) ) {
+        
+        if (branched3){
+            branchNow3 = false;
+        }
+        
+        if (!branched3){
+            branchNow3 = true;
+            branched3 = true;
         }
     }
     
@@ -63,6 +98,6 @@ void Turtle::draw()
     gl::pushMatrices();
     gl::translate( mStartPosition );
     gl::rotate( mRotateAngle );
-    gl::drawCylinder( 10.0f, 10.0f, mLength, 12, 1 );
+    gl::drawCylinder( mRadius, mRadius, mLength, 12, 1 );
     gl::popMatrices();
 }

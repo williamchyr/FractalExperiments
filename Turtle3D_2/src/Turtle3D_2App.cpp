@@ -28,7 +28,7 @@ public:
     
     Vec3f startPosition;
     Vec3f initialDirection;
-    Vec3f direction1;
+    Vec3f direction1, direction2;
     
     // PARAMS
 	params::InterfaceGl	mParams;
@@ -95,11 +95,12 @@ void Turtle3D_2App::setup()
     startPosition.set( 0.0f, 0.0f, 0.0f );
     initialDirection.set(0.0f, 0.0f, 0.0f );
     direction1.set( 0.0f, 0.0f, 90.0f );
+    direction2.set( 0.0f, 90.0f, 0.0f );
     
-    startLength = 200.0f;
+    startLength = 800.0f;
     
     Turtle firstTurtle;
-    firstTurtle.init( startPosition, Vec3f(0.0f, 0.0f, 0.0f), initialDirection, startLength );
+    firstTurtle.init( startPosition, Vec3f(0.0f, 0.0f, 0.0f), initialDirection, startLength, 20.0f );
     
     mTurtle.push_back( firstTurtle );
 }
@@ -130,14 +131,40 @@ void Turtle3D_2App::update()
             break;
         }       
         
-        if (mTurtle[i].branchNow){
+        if (mTurtle[i].branchNow1){
             
-            Turtle newTurtle1;
-            newTurtle1.init( mTurtle[i].mFinalPosition, mTurtle[i].mRotateAngle, direction1, 200.f + 20.0f*i);
+            if ( mTurtle[i].mFinalLength > 2.f)  {
+                Turtle newTurtle1;
+                newTurtle1.init( mTurtle[i].mCurrentPosition, mTurtle[i].mRotateAngle, direction1, mTurtle[i].mFinalLength*0.5f, mTurtle[i].mRadius*0.5f);
             
-            mTurtle.push_back( newTurtle1 );
+                mTurtle.push_back( newTurtle1 );
             
-            cout << "Hello \n";
+                //cout << "Hello1 \n";
+            }
+        }
+        
+        if (mTurtle[i].branchNow2){
+            
+            if ( mTurtle[i].mFinalLength > 2.f)  {
+                Turtle newTurtle2;
+                newTurtle2.init( mTurtle[i].mCurrentPosition, mTurtle[i].mRotateAngle, direction2, mTurtle[i].mFinalLength*0.5f, mTurtle[i].mRadius*0.5f);
+            
+                mTurtle.push_back( newTurtle2 );
+            
+                //cout << "Hello2 \n";
+            }
+        }
+        
+        if (mTurtle[i].branchNow3){
+            
+            if ( mTurtle[i].mFinalLength > 2.f)  {
+                Turtle newTurtle3;
+                newTurtle3.init( mTurtle[i].mCurrentPosition, mTurtle[i].mRotateAngle, direction1, mTurtle[i].mFinalLength*0.5f, mTurtle[i].mRadius*0.5f);
+            
+                mTurtle.push_back( newTurtle3 );
+            
+                //cout << "Hello3 \n";
+            }
         }
         
     }
