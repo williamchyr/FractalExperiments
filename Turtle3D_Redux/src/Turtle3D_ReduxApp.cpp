@@ -53,6 +53,7 @@ class Turtle3D_ReduxApp : public AppBasic {
     
     // RECT TURTLE
     RectTurtle mRectTurtle;
+    vector <RectTurtle> mRectTurtles;
 };
 
 void Turtle3D_ReduxApp::prepareSettings( Settings *settings )
@@ -68,7 +69,7 @@ void Turtle3D_ReduxApp::setup()
 	mEye			= Vec3f( 0.0f, 0.0f, mCameraDistance );
 	mCenter			= Vec3f( 0.0f, 0.0f, 0.0f );
 	mUp				= Vec3f::yAxis();
-	mCam.setPerspective( 75.0f, getWindowAspectRatio(), 5.0f, 2000.0f );
+	mCam.setPerspective( 75.0f, getWindowAspectRatio(), 5.0f, 3000.0f );
     
     // CAMERA ROTATION
     xAngle = 0.0f;
@@ -116,31 +117,31 @@ void Turtle3D_ReduxApp::setup()
     //mTurtles.push_back(testTurtle);
     
     mRectTurtle.init( startPosition, Vec3f(100.0f, 100.0f, 100.0f), zeroDirection, initialDirection); 
- 
+    
     Turtle newTurtle1;
-    newTurtle1.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle,mRectTurtle.mRotateAngle, 1, 200.0f, 20.0f);
+    newTurtle1.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle,mRectTurtle.mRotateAngle, 1, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle1 );
     
     Turtle newTurtle2;
-    newTurtle2.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 2, 200.0f, 20.0f);
+    newTurtle2.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 2, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle2 );
     
     Turtle newTurtle3;
-    newTurtle3.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 3, 200.0f, 20.0f);
+    newTurtle3.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 3, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle3 );
     
     Turtle newTurtle4;
-    newTurtle4.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 4, 200.0f, 20.0f);
+    newTurtle4.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 4, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle4 );
     
     Turtle newTurtle5;
-    newTurtle5.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 5, 200.0f, 20.0f);
+    newTurtle5.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 5, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle5 );
-    
+
     Turtle newTurtle6;
-    newTurtle6.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 6, 200.0f, 20.0f);
+    newTurtle6.init( mRectTurtle.mStartPosition, mRectTurtle.mPreviousAngle, mRectTurtle.mRotateAngle, 6, 500.0f, 20.0f);
     mTurtles.push_back( newTurtle6 );
-  
+
 }
 
 void Turtle3D_ReduxApp::mouseDown( MouseEvent event )
@@ -161,7 +162,8 @@ void Turtle3D_ReduxApp::keyDown( KeyEvent event )
 
 void Turtle3D_ReduxApp::update()
 {
-    cout << toString( mTurtles.size() ) + "\n";
+    cout << "number of turtles " + toString( mTurtles.size() ) + "\n";
+    cout << "number of rect turtles " + toString( mRectTurtles.size() ) + "\n";
     
     camAngle += M_PI/50;
     
@@ -181,27 +183,53 @@ void Turtle3D_ReduxApp::update()
     
     for (int i = 0; i < mTurtles.size(); i++) {
         mTurtles[i].update();
-      
-         cout << "Hello3 \n";
-       
-        if (mTurtles[i].mLength < 20.0f) {
+     
+        if (mTurtles[i].mLength < 10.0f) {
             break;
         }    
+      
         
-        if ( mTurtles[i].mFinalLength > 2.0f)  {
-            if (mTurtles[i].branchNow1 ){
-
-            Turtle newTurtle;
-            newTurtle.init( mTurtles[i].mFinalPosition, mTurtles[i].mFinalAngle, direction1, mTurtles[i].mFinalLength*0.5f, mTurtles[i].mRadius*0.7f);
-            
-            mTurtles.push_back( newTurtle );
-            
-            cout << "Hello3 \n";
+       
+        if (mTurtles[i].branchNow1 ){
+            if ( mTurtles[i].mFinalLength > 2.0f)  {
+                Turtle newTurtle;
+                newTurtle.init( mTurtles[i].mCurrentPosition, mTurtles[i].mFinalAngle, direction1, mTurtles[i].mFinalLength*0.5f, mTurtles[i].mRadius*0.7f);
+                mTurtles.push_back( newTurtle );
             }
         }
-       
+      
+        
+        cout << "AT LEAST IT IS UPDATING " + toString(i) + "\n";
+        cout << "BRANCHNOW2 FOR " + toString(i) + " is " + toString(mTurtles[i].branchNow2) + "\n";
+        
+        if (mTurtles[i].branchNow2 ){
+            
+            cout << "BEFORE LENGTH " + toString(i) + " AND IT IS " + toString(mTurtles[i].branchNow2) + "  \n";
+            
+            
+            if ( mTurtles[i].mFinalLength > 2.0f)  {
+                
+                cout << "GOT HERE " + toString(i) + " AND IT IS " + toString(mTurtles[i].branchNow2) + "  \n";
+                
+                RectTurtle newRectTurtle;
+                Vec3f tempSize;
+                tempSize.set(mTurtles[i].mFinalLength*0.2, mTurtles[i].mFinalLength*0.2, mTurtles[i].mFinalLength*0.2);
+                newRectTurtle.init( mTurtles[i].mCurrentPosition, tempSize, mTurtles[i].mFinalAngle, initialDirection);
+                mRectTurtles.push_back( newRectTurtle );
+                
+                cout << "mTurtle number " + toString(i) + " has branched rectangle \n";
+                
+                //mTurtles[i].branchNow1 = false;
+            }
+        }
+        
+        cout << "Turtle " + toString(i) + " is ALIVE \n";
     }
-         
+    
+    //UPDATE RECT TURTLE
+    for (int i = 0; i < mRectTurtles.size(); i++) {
+        mRectTurtles[i].update();
+    }
 }
 
 void Turtle3D_ReduxApp::draw()
@@ -248,9 +276,13 @@ void Turtle3D_ReduxApp::draw()
         gl::rotate( mTurtles[i].mFinalAngle );
         //gl::drawCube( Vec3f(0.0f, 0.0f, 0.0f), Vec3f( 20.0f, 20.0f, 20.0f ) );
         gl::popMatrices();
-         */
+        */
     }
     
+    //DRAW RECT TURTLE
+    for (int i = 0; i < mRectTurtles.size(); i++) {
+        mRectTurtles[i].draw();
+    }
     
     //testTurtle.draw();
     

@@ -36,11 +36,14 @@ void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, float
     
     branchNow1 = false;
     branched1 = false;
+    
+    branchNow2 = false;
+    branched2 = false;
 }
 
 void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, int rectFaceNumber, float length, float radius)
 {
-    cout << "I AM HERE \n";
+    //cout << "Turtle initiated \n";
     mStartPosition = position;
     mCurrentPosition = mStartPosition;
     
@@ -84,8 +87,11 @@ void Turtle::init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, int r
     
     branchNow1 = false;
     branched1 = false;
+    
+    branchNow2 = false;
+    branched2 = false;
 }
-
+/*
 void Turtle::update( float rotateX, float rotateY, float rotateZ)
 {
     mAddAngle.set( rotateX, rotateY, rotateZ);
@@ -96,7 +102,7 @@ void Turtle::update( float rotateX, float rotateY, float rotateZ)
      
     if (mLength < mFinalLength) {
         mLength += 1.0f;
-        mCurrentPosition += mCartesianDirection;
+        mCurrentPosition = mStartPosition + mCartesianDirection*mLength;
     }
     
     if (mLength > mFinalLength*(3.0f/4.0f) ) {
@@ -110,30 +116,58 @@ void Turtle::update( float rotateX, float rotateY, float rotateZ)
             branched1 = true;
         }
     }
+    
+    if (mLength > mFinalLength*(3.0f/4.0f) ) {
+        
+        if (branched2){
+            branchNow2 = false;
+        }
+        
+        if (!branched2){
+            branchNow2 = true;
+            branched2 = true;
+        }
+    }
 }
-
+*/
 void Turtle::update()
 {   
     if (mLength < mFinalLength) {
         mLength += 1.0f;
-        mCurrentPosition += mCartesianDirection;
+        mCurrentPosition = mStartPosition + mCartesianDirection*mLength;
     }
-    
-    if (mLength > mFinalLength*(3.0f/4.0f) ) {
-        
+   
+    if (mLength > mFinalLength*(2.0f/4.0f) ) {
+       
         if (branched1){
             branchNow1 = false;
         }
-        
+      
         if (!branched1){
             branchNow1 = true;
             branched1 = true;
+        }
+    }
+  
+   if (mLength >= mFinalLength) {
+       
+        if (branched2){
+            branchNow2 = false;
+        }
+      
+        
+        if (!branched2){
+            branchNow2 = true;
+            branched2 = true;
         }
     }
 }
 
 void Turtle::draw()
 {
+    ci::ColorA color1( CM_RGB, 1.0f, 0.0f, 1.0f, 1.0f );
+    glMaterialfv( GL_FRONT, GL_DIFFUSE,	color1 );
+    
     gl::pushMatrices();
     gl::translate( mStartPosition );
     gl::rotate( mFinalAngle);

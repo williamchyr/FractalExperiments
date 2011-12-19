@@ -58,7 +58,7 @@ void RectTurtle::update()
         mSize.z += 1.0f;
     }
     
-    if (mSize.x >= mFinalSize.x ) {
+    if (mSize.x > mFinalSize.x*(3.0f/4.0f) ) {
         
         if (branched1){
             branchNow1 = false;
@@ -74,15 +74,19 @@ void RectTurtle::update()
 
 void RectTurtle::draw()
 {   
-    ci::ColorA color1( CM_RGB, 1.0f, 1.0f, 0.0f, 1.0f );
+    ci::ColorA color1( CM_RGB, 0.0f, 1.0f, 1.0f, 1.0f );
     glMaterialfv( GL_FRONT, GL_DIFFUSE,	color1 );
 
     gl::pushMatrices();
     gl::translate( mStartPosition );
     gl::rotate( mFinalAngle );
     gl::drawCube( Vec3f(0.0f, 0.0f, 0.0f), mSize ); 
+    
+    //DRAW ROTATION AXIS 
+    /*
     gl::drawLine( Vec3f(-500.0f, 0.0f, 0.0f), Vec3f(500.0f, 0.0f, 0.0f) );
     gl::drawLine( Vec3f(0.0f, -500.0f, 0.0f), Vec3f(0.0f, 500.0f, 0.0f) );
     gl::drawLine( Vec3f(0.0f, 0.0f, -500.0f), Vec3f(0.0f, 0.0f, 500.0f) );
+    */
     gl::popMatrices();
 }

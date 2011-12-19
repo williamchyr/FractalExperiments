@@ -23,7 +23,7 @@ public:
     void init( Vec3f position, Vec3f previousAngle, Vec3f rotateAngle, int rectFaceNumber, float length, float radius);
     
     void update();
-    void update(float rotateX, float rotateY, float rotateZ);
+    //void update(float rotateX, float rotateY, float rotateZ);
     void draw();
     Vec3f cartesianConvert( Vec3f angle );
     
