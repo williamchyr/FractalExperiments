@@ -1,8 +1,9 @@
 #include "cinder/app/AppBasic.h"
 #include "cinder/gl/gl.h"
-#include "cinder/Utilities.h" 
 #include "cinder/Camera.h"
 #include "cinder/params/Params.h"
+#include "cinder/Utilities.h" 
+#include "cinder/matrix.h"
 #include "Turtle.h"
 #include <vector>
 
@@ -19,37 +20,39 @@ class Turtle3DApp : public AppBasic {
     void prepareSettings( Settings *settings );
 	void setup();
 	void mouseDown( MouseEvent event );	
+    void keyDown( KeyEvent event );
 	void update();
 	void draw();
-    
-    // TURTLES
-    vector <Turtle> mTurtle;
-    float startLength;
-    
-    Vec3f startPosition;
-    Vec3f initialDirection;
-    Vec3f direction1;
-    Vec3f direction2;
     
     // PARAMS
 	params::InterfaceGl	mParams;
     
     // CAMERA
     CameraPersp mCam;
-    Quatf mSceneRotation;
+    Quatf   mSceneRotation;
     float	mCameraDistance;
     Vec3f   mEye, mCenter, mUp;
     
     // ROTATION
     float xAngle, yAngle, zAngle;
-    float xAngleAdjusted, yAngleAdjusted, zAngleAdjusted;
-    
-    float X, Y, Z;
-    
     float mDirectional;
     
-    float camAngle;
+    // TURTLE
+    Turtle firstTurtle;
     
+    Vec3f originalPosition;
+    Vec3f originalRotation;
+    float originalLength;
+    float orginalRadius;
+    
+    vector<Turtle> mTurtles;
+    
+    Vec3f direction1;
+    Vec3f direction2;
+    Vec3f direction3;
+    
+    // AXIS
+    bool mShowAxis;
 };
 
 void Turtle3DApp::prepareSettings( Settings *settings )
@@ -65,9 +68,9 @@ void Turtle3DApp::setup()
 	mEye			= Vec3f( 0.0f, 0.0f, mCameraDistance );
 	mCenter			= Vec3f( 0.0f, 0.0f, 0.0f );
 	mUp				= Vec3f::yAxis();
-	mCam.setPerspective( 75.0f, getWindowAspectRatio(), 5.0f, 2000.0f );
+	mCam.setPerspective( 75.0f, getWindowAspectRatio(), 5.0f, 3000.0f );
     
-    // ROTATION
+    // CAMERA ROTATION
     xAngle = 0.0f;
     yAngle = 0.0f;
     zAngle = 0.0f;
@@ -90,27 +93,38 @@ void Turtle3DApp::setup()
     
     mDirectional = 1.0f;
     
-    camAngle = 0;
+    // AXIS
+    mShowAxis = false;
     
     // TURTLE
-    startPosition.set( 0.0f, 0.0f, 0.0f );
-    initialDirection.set(0.0f, 1.0f, 0.0f );
-    startLength = 200.0f;
+    originalPosition.set( 0.0f, -200.0f, 0.0f);
+    originalRotation.set( 0.0f, 0.0f, 0.0f);
+    originalLength = 300.0f;
+    orginalRadius = 20.0f;
     
-    Turtle firstTurtle;
-    firstTurtle.init( startPosition, initialDirection, startLength );
+    firstTurtle.init( originalPosition, Vec3f(0.0f, 0.0f, 0.0f), originalRotation, originalLength, orginalRadius, 1.0f, 1.0f, 1.0f );
     
-    mTurtle.push_back( firstTurtle );
+    mTurtles.push_back( firstTurtle );
+    
+    direction1.set( 0.0f, 0.0f, 25.0f );
+    direction2.set( 0.0f, 120.0f, 45.0f);
+    direction3.set( 0.0f, 240.0f, 80.0f);
+    
 }
 
 void Turtle3DApp::mouseDown( MouseEvent event )
 {
 }
 
+void Turtle3DApp::keyDown( KeyEvent event )
+{
+    if( event.getChar() == 'a' ){
+		mShowAxis = ! mShowAxis;
+	}
+}
+
 void Turtle3DApp::update()
-{   
-    camAngle += M_PI/50;
-    
+{
     //UPDATE CAMERA
     
     mEye = Vec3f( 0.0f, 0.0f, mCameraDistance );
@@ -121,34 +135,32 @@ void Turtle3DApp::update()
     gl::rotate( mSceneRotation );
     
     
-    //UPDATE TURTLE
-    for (int i = 0; i < mTurtle.size(); i++) {
-        mTurtle[i].update();
-        
-        if (mTurtle[i].mLength < 20.0f) {
-            break;
+    //UDPATE TURTLE
+    for (int i = 0; i < mTurtles.size(); i++ ) {
+        mTurtles[i].update();
+
+        if (mTurtles[i].branchNow2 ){
+            if ( mTurtles[i].mFinalLength > 10.0f)  {
+                Turtle newTurtle;
+                newTurtle.init( mTurtles[i].mWorldEndPosition, mTurtles[i].mTotalRotationMatrix, direction1, mTurtles[i].mFinalLength*0.6f, mTurtles[i].mRadius*0.7f, 1.0f, 1.0f, 1.0f);
+                mTurtles.push_back( newTurtle );
+                     
+                Turtle newTurtle2;
+                newTurtle2.init( mTurtles[i].mWorldEndPosition, mTurtles[i].mTotalRotationMatrix, direction2, mTurtles[i].mFinalLength*0.65f, mTurtles[i].mRadius*0.7f, 1.0f, 1.0f, 1.0f);
+                mTurtles.push_back( newTurtle2 );
+                
+                Turtle newTurtle3;
+                newTurtle3.init( mTurtles[i].mWorldEndPosition, mTurtles[i].mTotalRotationMatrix, direction3, mTurtles[i].mFinalLength*0.5f, mTurtles[i].mRadius*0.7f, 1.0f, 1.0f, 1.0f);
+                mTurtles.push_back( newTurtle3 );
+            }
         }
-        
-       
-        if (mTurtle[i].branchNow){
-            Turtle newTurtle1;
-            newTurtle1.init( mTurtle[i].mCurrentPosition, direction1, (mTurtle[i].mLength)*0.80);
-            
-            mTurtle.push_back( newTurtle1 );
-            
-            Turtle newTurtle2;
-            newTurtle2.init( mTurtle[i].mCurrentPosition, direction2, (mTurtle[i].mLength)*0.80);
-            
-            mTurtle.push_back( newTurtle2 );
-            cout << "Hello \n";
-        }
-       
+
     }
 }
 
 void Turtle3DApp::draw()
 {
-    glEnable( GL_LIGHTING );
+	glEnable( GL_LIGHTING );
 	glEnable( GL_LIGHT0 );
     glEnable( GL_LIGHT1 );
 	
@@ -156,32 +168,31 @@ void Turtle3DApp::draw()
 	GLfloat light_position[] = { -200.0f, 400.0f, 275.0f, mDirectional };
 	glLightfv( GL_LIGHT0, GL_POSITION, light_position );
     
-    
     GLfloat light_position1[] = { -500.0f, -300.0f, -400.0f, mDirectional };
     glLightfv( GL_LIGHT1, GL_POSITION, light_position1 );
     glLightfv( GL_LIGHT1, GL_DIFFUSE, light1_diffuse );
     
-    
     glMaterialfv( GL_FRONT, GL_AMBIENT,	mat_ambient );
     
-    
-    // DRAW TURTLE
-    for (int i = 0; i < mTurtle.size(); i++) {
-        mTurtle[i].draw( xAngle, yAngle, zAngle );
+    // DRAW AXIS
+    if (mShowAxis){
+        ci::ColorA colorX( CM_RGB, 1.0f, 0.0f, 0.0f, 1.0f );
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,	colorX );
+        gl::drawLine( Vec3f(-500.0f, 0.0f, 0.0f), Vec3f(500.0f, 0.0f, 0.0f) );
+        
+        ci::ColorA colorY( CM_RGB, 0.0f, 1.0f, 0.0f, 1.0f );
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,	colorY );
+        gl::drawLine( Vec3f(0.0f, -500.0f, 0.0f), Vec3f(0.0f, 500.0f, 0.0f) );
+        
+        ci::ColorA colorZ( CM_RGB, 0.0f, 0.0f, 1.0f, 1.0f );
+        glMaterialfv( GL_FRONT, GL_DIFFUSE,	colorZ );
+        gl::drawLine( Vec3f(0.0f, 0.0f, -500.0f), Vec3f(0.0f, 0.0f, 500.0f) );
     }
     
-    yAngleAdjusted = ((360.0f -yAngle)/180.0f)*M_PI;
-    zAngleAdjusted = ((360.0f - zAngle)/180.0f)*M_PI;
-    
-    X = cos( yAngleAdjusted )*sin( zAngleAdjusted );
-    Z = sin( yAngleAdjusted )*sin( zAngleAdjusted );
-    Y = cos( (zAngle/180.0f)*M_PI );
-    
-    // This is to make sure that the conversion from polar coordinates to cartesian is successful
-    gl::drawSphere( Vec3f( X*startLength, Y*startLength, Z*startLength ), 20.0f, 50 );
-    
-    cout << "X: " + toString(X) + ", Y: " + toString(Y) + ", Z: " + toString(Z) + " \n";
-    
+    // DRAW TURTLE
+    for (int i= 0; i< mTurtles.size(); i++) {
+        mTurtles[i].draw();
+    }
     // DRAW PARAMS WINDOW
 	params::InterfaceGl::draw();
 }
