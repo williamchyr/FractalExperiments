@@ -1,13 +1,13 @@
 //
-//  SphereTurtle.h
-//  LSystem3D_002
+//  CuboidTurtle.h
+//  Turtle3D
 //
 //  Created by Willy Chyr on 12/29/11.
 //  Copyright 2011 Willy Chyr. All rights reserved.
 //
 
-#ifndef LSystem3D_002_SphereTurtle_h
-#define LSystem3D_002_SphereTurtle_h
+#ifndef Turtle3D_CuboidTurtle_h
+#define Turtle3D_CuboidTurtle_h
 
 
 

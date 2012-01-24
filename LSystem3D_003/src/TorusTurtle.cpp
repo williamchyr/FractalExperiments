@@ -1,12 +1,12 @@
 //
-//  Turtle.cpp
+//  TorusTurtle.cpp
 //  LSystem3D_003
 //
 //  Created by Willy Chyr on 1/4/12.
 //  Copyright 2012 Willy Chyr. All rights reserved.
 //
 
-#include "Turtle.h"
+#include "TorusTurtle.h"
 #include "cinder/gl/gl.h"
 #include "cinder/app/AppBasic.h"
 #include "cinder/Utilities.h" 
@@ -15,24 +15,24 @@
 
 using namespace ci;
 
-Turtle::Turtle()
+TorusTurtle::TorusTurtle()
 {
 }
 
-void Turtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, float length, float radius, float r, float g, float b)
+void TorusTurtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, float outerRadius, float innerRadius, float r, float g, float b)
 {
     mWorldStartPosition = startPosition;
     mLocalBasisRotation = basisRotation;
     mLocalObjectRotation = objectRotation;
     
-    mFinalLength = length;
-    mLength = 0.0f;
+    mFinalOuterRadius = outerRadius;
+    mOuterRadius = 0.0f; 
+    mFinalInnerRadius = innerRadius;
+    mInnerRadius = 0.0f;
     
-    mObjectEndPosition.set(0.0f, mFinalLength, 0.0f); //because cylinder's length is along the y-axis
+    mObjectEndPosition.set(0.0f, mFinalOuterRadius, 0.0f); //because cylinder's length is along the y-axis
     
-    mRadius = radius;
-    
-    mR = r/255.05;
+    mR = r/255.0f;
     mG = g/255.0f;
     mB = b/255.0f;
     
@@ -49,25 +49,22 @@ void Turtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotatio
     branchNow2 = false;
     branched2 = false;
     
-    branchNow3 = false;
-    branched3 = false;
-    
     matrixInput = false;
 }
 
-void Turtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, float length, float radius, float r, float g, float b)
+void TorusTurtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, float outerRadius, float innerRadius, float r, float g, float b)
 {
     mWorldStartPosition = startPosition;
     mPreviousRotationMatrix = rotationMatrix;
     
     mLocalObjectRotation = objectRotation;
     
-    mFinalLength = length;
-    mLength = 0.0f;
+    mFinalOuterRadius = outerRadius;
+    mOuterRadius = 0.0f;
+    mFinalInnerRadius = innerRadius;
+    mInnerRadius = 0.0f;
     
-    mObjectEndPosition.set(0.0f, mFinalLength, 0.0f); //because cylinder's length is along the y-axis
-    
-    mRadius = radius;
+    mObjectEndPosition.set(0.0f, mFinalOuterRadius, 0.0f); //because cylinder's length is along the y-axis
     
     mR = r/255.0f;
     mG = g/255.0f;
@@ -86,22 +83,23 @@ void Turtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f ob
     branchNow2 = false;
     branched2 = false;
     
-    branchNow3 = false;
-    branched3 = false;
-    
     matrixInput = true;
 }
 
-void Turtle::update()
+void TorusTurtle::update()
 {
-    if (mLength < mFinalLength) {
-        mLength += 2.0f;
-        mLocalCurrentPosition.set( 0.0f, mLength, 0.0f );
+    if (mOuterRadius < mFinalOuterRadius) {
+        mOuterRadius += 1.0f;
+        mLocalCurrentPosition.set( 0.0f, mOuterRadius, 0.0f );
+    }
+    
+    if (mInnerRadius < mFinalInnerRadius ) {
+        mInnerRadius += 1.0f;
     }
     
     mWorldCurrentPosition = getWorldPosition( mWorldStartPosition, mTotalRotationMatrix, mLocalCurrentPosition );
     
-    if (mLength > mFinalLength*(2.0f/4.0f) ) {
+    if (mOuterRadius > mFinalOuterRadius*(2.0f/4.0f) ) {
         
         if (branched1){
             branchNow1 = false;
@@ -113,7 +111,7 @@ void Turtle::update()
         }
     }
     
-    if (mLength > mFinalLength*(3.0f/4.0f) ) {
+    if (mOuterRadius >= mFinalOuterRadius ) {
         
         if (branched2){
             branchNow2 = false;
@@ -124,23 +122,9 @@ void Turtle::update()
             branched2 = true;
         }
     }
-    
-    if (mLength >= mFinalLength ) {
-        
-        if (branched3){
-            branchNow3 = false;
-        }
-        
-        if (!branched3){
-            branchNow3 = true;
-            branched3 = true;
-        }
-    }
 }
 
-
-
-void Turtle::draw()
+void TorusTurtle::draw()
 {
     ci::ColorA color1( CM_RGB, mR, mG, mB );
     glMaterialfv( GL_FRONT, GL_DIFFUSE,	color1 );   
@@ -149,13 +133,13 @@ void Turtle::draw()
     gl::translate( mWorldStartPosition );
     gl::multModelView(  mTotalRotationMatrix );
     
-    gl::drawCylinder( mRadius, mRadius, mLength );
+    gl::drawTorus( mOuterRadius, mInnerRadius, 24, 40 );
     
     gl::popMatrices();
     
 }
 
-Vec3f Turtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalLocalRotation, Vec3f localEndPosition )
+Vec3f TorusTurtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalLocalRotation, Vec3f localEndPosition )
 {
     Matrix44 <float> m4;
     Vec3f worldEndPosition;
@@ -164,12 +148,11 @@ Vec3f Turtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalL
     m4 = m4*totalLocalRotation;
     
     worldEndPosition = m4.transformPoint( localEndPosition );
-    //cout << "translate and rotate: " + toString( worldEndPosition .x) + ", " + toString( worldEndPosition .y) + ", " + toString( worldEndPosition .z) + "\n";
     
     return worldEndPosition;
 }
 
-Matrix44<float> Turtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f localObjectRotation)
+Matrix44<float> TorusTurtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f localObjectRotation)
 {
     Matrix44 <float> m4;
     
@@ -187,7 +170,7 @@ Matrix44<float> Turtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f l
     
 }
 
-Matrix44<float> Turtle::getTotalLocalRotation( Matrix44<float> previousRotation, Vec3f localObjectRotation )
+Matrix44<float> TorusTurtle::getTotalLocalRotation( Matrix44<float> previousRotation, Vec3f localObjectRotation )
 {
     Matrix44 <float> m4;
     

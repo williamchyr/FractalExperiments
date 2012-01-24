@@ -1,5 +1,5 @@
 //
-//  Turtle.h
+//  TorusTurtle.h
 //  LSystem3D_003
 //
 //  Created by Willy Chyr on 1/4/12.
@@ -10,18 +10,18 @@
 #include "cinder/Color.h"
 #include "cinder/matrix.h"
 
-#ifndef LSystem3D_003_Turtle_h
-#define LSystem3D_003_Turtle_h
+#ifndef LSystem3D_003_TorusTurtle_h
+#define LSystem3D_003_TorusTurtle_h
 
 using namespace ci;
 using namespace std;
 
-class Turtle{
+class TorusTurtle{
 public:
-    Turtle();
+    TorusTurtle();
     
-    void init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, float length, float radius, float r, float g, float b);
-    void init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, float length, float radius, float r, float g, float b);
+    void init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, float outerRadius, float innerRadius, float r, float g, float b);
+    void init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, float outerRadius, float innerRadius, float r, float g, float b);
     
     void update();
     void draw();
@@ -49,9 +49,10 @@ public:
     Matrix44 <float> mPreviousRotationMatrix;
     Matrix44 <float> mTotalRotationMatrix; // This gets passed onto next object as a parameter
     
-    float mRadius;
-    float mLength;
-    float mFinalLength;
+    float mFinalOuterRadius;
+    float mFinalInnerRadius;
+    float mOuterRadius;
+    float mInnerRadius;
     
     bool branchNow1;
     bool branched1; 

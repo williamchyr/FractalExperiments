@@ -1,12 +1,12 @@
 //
-//  Turtle.cpp
+//  CuboidTurtle.cpp
 //  LSystem3D_003
 //
 //  Created by Willy Chyr on 1/4/12.
 //  Copyright 2012 Willy Chyr. All rights reserved.
 //
 
-#include "Turtle.h"
+#include "CuboidTurtle.h"
 #include "cinder/gl/gl.h"
 #include "cinder/app/AppBasic.h"
 #include "cinder/Utilities.h" 
@@ -15,24 +15,24 @@
 
 using namespace ci;
 
-Turtle::Turtle()
+CuboidTurtle::CuboidTurtle()
 {
 }
 
-void Turtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, float length, float radius, float r, float g, float b)
+void CuboidTurtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotation, Vec3f size, bool stroked, float r, float g, float b)
 {
     mWorldStartPosition = startPosition;
     mLocalBasisRotation = basisRotation;
     mLocalObjectRotation = objectRotation;
     
-    mFinalLength = length;
-    mLength = 0.0f;
+    mFinalSize = size;
+    mSize.set( 0.0f, 0.0f, 0.0f );
     
-    mObjectEndPosition.set(0.0f, mFinalLength, 0.0f); //because cylinder's length is along the y-axis
+    mStroked = stroked;
     
-    mRadius = radius;
+    mObjectEndPosition.set(0.0f, mFinalLength*2.0f, 0.0f); //There's no real "end position" for a sphere. Cylinders start from the center, the mWorldStartPosition. Thus, this can be changed accordingly.
     
-    mR = r/255.05;
+    mR = r/255.0f;
     mG = g/255.0f;
     mB = b/255.0f;
     
@@ -49,25 +49,22 @@ void Turtle::init( Vec3f startPosition, Vec3f basisRotation, Vec3f objectRotatio
     branchNow2 = false;
     branched2 = false;
     
-    branchNow3 = false;
-    branched3 = false;
-    
     matrixInput = false;
 }
 
-void Turtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, float length, float radius, float r, float g, float b)
+void CuboidTurtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f objectRotation, Vec3f size, bool stroked, float r, float g, float b)
 {
     mWorldStartPosition = startPosition;
     mPreviousRotationMatrix = rotationMatrix;
     
     mLocalObjectRotation = objectRotation;
+
+    mFinalSize = size;
+    mSize.set( 0.0f, 0.0f, 0.0f );
     
-    mFinalLength = length;
-    mLength = 0.0f;
+    mStroked = stroked;
     
-    mObjectEndPosition.set(0.0f, mFinalLength, 0.0f); //because cylinder's length is along the y-axis
-    
-    mRadius = radius;
+    mObjectEndPosition.set(0.0f, (mSize.x)*2.0f, 0.0f); //because cylinder's length is along the y-axis
     
     mR = r/255.0f;
     mG = g/255.0f;
@@ -86,22 +83,28 @@ void Turtle::init( Vec3f startPosition, Matrix44<float> rotationMatrix, Vec3f ob
     branchNow2 = false;
     branched2 = false;
     
-    branchNow3 = false;
-    branched3 = false;
-    
     matrixInput = true;
+    
 }
 
-void Turtle::update()
+void CuboidTurtle::update()
 {
-    if (mLength < mFinalLength) {
-        mLength += 2.0f;
-        mLocalCurrentPosition.set( 0.0f, mLength, 0.0f );
+    if (mSize.x < mFinalSize.x) {
+        mSize.x += 1.0f;
+        mLocalCurrentPosition.set( 0.0f, mSize.x, 0.0f );
+    }
+    
+    if (mSize.y < mFinalSize.y) {
+        mSize.y += 1.0f;
+    }
+    
+    if (mSize.z < mFinalSize.z) {
+        mSize.z += 1.0f;
     }
     
     mWorldCurrentPosition = getWorldPosition( mWorldStartPosition, mTotalRotationMatrix, mLocalCurrentPosition );
     
-    if (mLength > mFinalLength*(2.0f/4.0f) ) {
+    if (mSize.x > mFinalSize.x*(2.0f/4.0f) ) {
         
         if (branched1){
             branchNow1 = false;
@@ -113,7 +116,7 @@ void Turtle::update()
         }
     }
     
-    if (mLength > mFinalLength*(3.0f/4.0f) ) {
+    if (mSize.x >= mFinalSize.x ) {
         
         if (branched2){
             branchNow2 = false;
@@ -124,23 +127,9 @@ void Turtle::update()
             branched2 = true;
         }
     }
-    
-    if (mLength >= mFinalLength ) {
-        
-        if (branched3){
-            branchNow3 = false;
-        }
-        
-        if (!branched3){
-            branchNow3 = true;
-            branched3 = true;
-        }
-    }
 }
 
-
-
-void Turtle::draw()
+void CuboidTurtle::draw()
 {
     ci::ColorA color1( CM_RGB, mR, mG, mB );
     glMaterialfv( GL_FRONT, GL_DIFFUSE,	color1 );   
@@ -149,13 +138,17 @@ void Turtle::draw()
     gl::translate( mWorldStartPosition );
     gl::multModelView(  mTotalRotationMatrix );
     
-    gl::drawCylinder( mRadius, mRadius, mLength );
+    if (mStroked) {
+        gl::drawStrokedCube( Vec3f(0.0f, 0.0f, 0.0f), mSize );
+    } else {
+        gl::drawCube( Vec3f(0.0f, 0.0f, 0.0f), mSize );
+    }
     
     gl::popMatrices();
     
 }
 
-Vec3f Turtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalLocalRotation, Vec3f localEndPosition )
+Vec3f CuboidTurtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalLocalRotation, Vec3f localEndPosition )
 {
     Matrix44 <float> m4;
     Vec3f worldEndPosition;
@@ -169,7 +162,7 @@ Vec3f Turtle::getWorldPosition( Vec3f worldStartPosition, Matrix44<float> totalL
     return worldEndPosition;
 }
 
-Matrix44<float> Turtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f localObjectRotation)
+Matrix44<float> CuboidTurtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f localObjectRotation)
 {
     Matrix44 <float> m4;
     
@@ -187,7 +180,7 @@ Matrix44<float> Turtle::getTotalLocalRotation( Vec3f localBasisRotation, Vec3f l
     
 }
 
-Matrix44<float> Turtle::getTotalLocalRotation( Matrix44<float> previousRotation, Vec3f localObjectRotation )
+Matrix44<float> CuboidTurtle::getTotalLocalRotation( Matrix44<float> previousRotation, Vec3f localObjectRotation )
 {
     Matrix44 <float> m4;
     
